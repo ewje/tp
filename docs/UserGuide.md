@@ -27,7 +27,8 @@ the candidate does not replace the published v1.5 downloads yet.
 1. Ensure that Java `25` is installed on your computer.<br>
    **Mac users:** Ensure you have the precise JDK version prescribed [here](https://se-education.org/guides/tutorials/javaInstallationMac.html).
 
-1. For candidate testing, obtain the v1.6 JAR and its checksum from the team and save it as
+1. For candidate testing, obtain the unchanged v1.6 JAR and `SHA256SUMS.txt` from the team's
+   unpublished draft release (repository access required) and save the JAR as
    `ZoomAddress-v1.6.jar`. The same JAR is used on all four platforms above; no separate Mac ARM JAR is needed.
    * Use Java 25 for your runtime architecture. Windows and Linux ARM runtimes are not covered by this package.
    * Run `java -XshowSettings:properties -version` and find `os.arch` to check the active Java runtime:
@@ -87,6 +88,9 @@ The screenshots use synthetic participants and show the JavaFX application conte
 fonts may differ by platform.
 
 ![Directory after list, showing four participants, displayed indices, assignments and remarks](images/Ui.png)
+
+*Directory captured from the exact v1.6 candidate on Windows with Java 25. The JavaFX scene uses synthetic
+participants and omits OS window decorations; it is not a screenshot of the published v1.5 package.*
 
 *A `list` result: cards show assignments and non-empty remarks. Chen and Devi still need groups, shown as
 `Unassigned`; missing roles or activities are omitted from their cards.*
