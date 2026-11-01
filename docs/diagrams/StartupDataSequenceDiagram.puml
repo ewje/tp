@@ -6,77 +6,31 @@ participant ":MainApp" as App UI_COLOR
 participant ":StorageManager" as Storage STORAGE_COLOR
 participant ":JsonAddressBookStorage" as Json STORAGE_COLOR
 participant "JsonUtil" as JsonUtil STORAGE_COLOR
-participant ":ModelManager" as Model MODEL_COLOR
-participant ":LogicManager" as Logic LOGIC_COLOR
-participant ":UiManager" as Ui UI_COLOR
-participant "startupAlert:Alert" as Alert UI_COLOR
-participant "Platform" as Platform UI_COLOR
 
-[-> App : init()
+[-> App : initModelManager()
 activate App
 App -> Storage : readAddressBook()
 activate Storage
 Storage -> Json : readAddressBook()
 activate Json
-Json -> Json : inspect data path without following final link
-alt genuinely absent file
-    note over Json : Return Optional.empty() for first launch.
-else existing readable file
+Json -> Json : inspect path without following final link
+alt file genuinely absent
+    Json --> Storage : Optional.empty()
+else existing file
     Json -> JsonUtil : readJsonFile(path)
     activate JsonUtil
-    note over JsonUtil : Jackson rejects duplicate keys within each object,\nincluding nested and escaped field names.
-    JsonUtil --> Json : parsed JSON or DataLoadingException
+    note over JsonUtil : Reject malformed JSON, null document\nand duplicate keys.
+    JsonUtil --> Json : parsed data or load failure
     deactivate JsonUtil
-    note over Json : Convert valid values to model data;
-    note over Json : invalid values throw DataLoadingException.
-else existing unreadable path or dangling link
-    note over Json : Throw DataLoadingException;
-    note over Json : never report a missing first-run file.
+    Json -> Json : convert values to model
+    note over Json : Reject values caught by adapters\nand model validators, not every JSON type.
+    Json --> Storage : model data or load failure
+else unreadable path or dangling link
+    Json --> Storage : load failure
 end
-Json --> Storage : loaded data, empty, or load failure
 deactivate Json
-Storage --> App : loaded data, empty, or load failure
+Storage --> App : data, empty, or load failure
 deactivate Storage
-
-alt data loaded or genuinely absent
-    create Model
-    App -> Model : new ModelManager(loaded or sample data, prefs)
-    activate Model
-    Model --> App : model
-    deactivate Model
-    create Logic
-    App -> Logic : new LogicManager(model, storage)
-    activate Logic
-    Logic --> App : logic
-    deactivate Logic
-    create Ui
-    App -> Ui : new UiManager(logic, data path)
-    activate Ui
-    Ui --> App : ui
-    deactivate Ui
-else load failure
-    App -> App : retain actionable startup error
-    note over App : Model, logic and UI remain null.
-end
-[<-- App : init complete
-deactivate App
-
-[-> App : start(stage)
-activate App
-alt load failure
-    create Alert
-    App -> Alert : new Alert(ERROR)
-    activate Alert
-    Alert --> App : alert
-    deactivate Alert
-    App -> Alert : showAndWait(error and recovery steps)
-    activate Alert
-    Alert --> App : user closes dialog
-    deactivate Alert
-    App -> Platform : exit()
-else successful load
-    App -> Ui : start(stage)
-end
 [<-- App
 deactivate App
 @enduml

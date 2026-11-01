@@ -5,8 +5,9 @@ import java.util.Objects;
 import java.util.function.Predicate;
 
 /**
- * Tests whether a person's selected assignment exactly matches a value,
- * ignoring case and surrounding whitespace.
+ * Tests whether a person's selected assignment exactly matches a value after
+ * stripping surrounding whitespace and lower-casing with {@link Locale#ROOT}.
+ * This is not full Unicode case folding; some differently cased Unicode labels do not match.
  */
 public class AssignmentMatchesPredicate implements Predicate<Person> {
 

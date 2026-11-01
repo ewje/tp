@@ -1,0 +1,42 @@
+@startuml
+!include style.puml
+skinparam ArrowFontStyle plain
+
+participant ":MainApp" as App UI_COLOR
+participant ":ModelManager" as Model MODEL_COLOR
+participant ":LogicManager" as Logic LOGIC_COLOR
+participant ":UiManager" as Ui UI_COLOR
+participant "startupAlert:Alert" as Alert UI_COLOR
+participant "Platform" as Platform UI_COLOR
+
+[-> App : init()
+activate App
+alt data loaded or file absent
+    create Model
+    App -> Model : new ModelManager(data or samples, prefs)
+    create Logic
+    App -> Logic : new LogicManager(model, storage)
+    create Ui
+    App -> Ui : new UiManager(logic, data path)
+else participant-data load failure
+    App -> App : retain startup error
+    note over App : Model, logic and UI remain null.
+end
+[<-- App
+deactivate App
+
+[-> App : start(stage)
+activate App
+alt startup error retained
+    create Alert
+    App -> Alert : new Alert(ERROR)
+    App -> Alert : setContentText(startupError)
+    App -> Alert : showAndWait()
+    Alert --> App : dialog closed
+    App -> Platform : exit()
+else successful load
+    App -> Ui : start(stage)
+end
+[<-- App
+deactivate App
+@enduml
