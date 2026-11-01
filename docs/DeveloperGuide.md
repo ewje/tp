@@ -883,13 +883,16 @@ Check startup, commands, save/reopen behavior and the guide examples. Record the
 source commit, SHA-256, byte size, runtime architecture and results for each platform.
 Do not rebuild between platform tests; a rebuilt JAR needs a new checksum and retesting.
 
-The application version is V1.6 and the User Guide describes the universal candidate.
-The published v1.5 packages remain architecture-specific. Preparing this candidate does
-not replace those assets or establish release readiness. After candidate testing succeeds,
-replace the guide's candidate notice with the verified public download instructions and
-publish the approved checksum; never silently replace an existing published artifact.
+The application version is V1.6 and the User Guide describes the
+[published universal v1.6 release](https://github.com/AY2627S1-CS2103T-W13-2/tp/releases/tag/v1.6).
+The older v1.5 packages remain architecture-specific. For a future release, complete
+candidate testing before updating the guide's public download instructions and publishing
+the approved checksum; never silently replace an existing published JAR.
 
 ### Launching the JAR
+
+Use this pre-release smoke test to check a newly built candidate before publication.
+To run the published v1.6 release, follow the [User Guide's Quick Start](UserGuide.md#quick-start).
 
 1. Copy the universal candidate into an empty folder as `addressbook.jar`.
    Use the same candidate and checksum on every platform, with a native Java 25 JVM.
