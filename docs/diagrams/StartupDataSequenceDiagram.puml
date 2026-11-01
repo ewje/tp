@@ -20,11 +20,17 @@ else existing file
     Json -> JsonUtil : readJsonFile(path)
     activate JsonUtil
     note over JsonUtil : Reject malformed JSON, null document\nand duplicate keys.
-    JsonUtil --> Json : parsed data or load failure
-    deactivate JsonUtil
-    Json -> Json : convert values to model
-    note over Json : Reject values caught by adapters\nand model validators, not every JSON type.
-    Json --> Storage : model data or load failure
+    alt JSON read and parsing succeeds
+        JsonUtil --> Json : parsed data
+        deactivate JsonUtil
+        Json -> Json : convert values to model
+        note over Json : Reject values caught by adapters\nand model validators, not every JSON type.
+        Json --> Storage : model data or load failure
+    else JSON read or parsing fails
+        JsonUtil --> Json : DataLoadingException
+        deactivate JsonUtil
+        Json --> Storage : load failure; no conversion
+    end
 else unreadable path or dangling link
     Json --> Storage : load failure
 end

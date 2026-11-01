@@ -414,10 +414,13 @@ participant fields (including assignments and remarks), saved JSON bytes and rel
 
 `FilterCommandParser` accepts exactly one of the group, role, or activity prefixes and creates one `FilterCommand`.
 The command uses the reusable `AssignmentMatchesPredicate`, parameterised by an `AssignmentType`, instead of separate
-predicates and commands for each assignment field. The predicate trims the requested value, normalises it with
-locale-independent lower-casing, and compares it with the participant's corresponding optional assignment. A missing
-assignment therefore cannot match. Lower-casing is not full Unicode case folding: for example, stored `İstanbul`
-does not match query `istanbul`. Users must search using the stored spelling for such labels; see
+predicates and commands for each assignment field. The predicate calls `String.strip()` on both values, lower-cases
+them with `Locale.ROOT`, and compares the participant's corresponding optional assignment. `String.strip()` does not
+remove U+00A0 NO-BREAK SPACE, so a label made only of that character remains a present assignment and is excluded
+from `unassigned` results (see [#116](https://github.com/AY2627S1-CS2103T-W13-2/tp/issues/116) and
+[#120](https://github.com/AY2627S1-CS2103T-W13-2/tp/issues/120)). A missing assignment cannot match. Lower-casing
+is not full Unicode case folding: stored `İstanbul` does not match query `istanbul`. Users must search using the
+stored spelling for such labels; see
 [issue #139](https://github.com/AY2627S1-CS2103T-W13-2/tp/issues/139).
 
 For a quoted single-filter value, `FilterCommandParser` uses the same `QuotedAssignmentValueParser` as

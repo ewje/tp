@@ -7,6 +7,7 @@ import java.util.function.Predicate;
 /**
  * Tests whether a person's selected assignment exactly matches a value after
  * stripping surrounding whitespace and lower-casing with {@link Locale#ROOT}.
+ * {@code String.strip()} does not remove U+00A0 NO-BREAK SPACE.
  * This is not full Unicode case folding; some differently cased Unicode labels do not match.
  */
 public class AssignmentMatchesPredicate implements Predicate<Person> {
