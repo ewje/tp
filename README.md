@@ -4,13 +4,11 @@
 
 ![ZoomAddress directory with four participants, assignments and event-day remarks](docs/images/Ui.png)
 
-*v1.6 candidate captured from the unchanged packaged JAR with synthetic data; OS window
-decorations are omitted. Publication awaits final verification and Pavan's approval.*
+*v1.6 captured from the published JAR with synthetic data; OS window decorations are omitted.*
 
-**Downloads:** [v1.5 is the current published release](https://github.com/AY2627S1-CS2103T-W13-2/tp/releases/tag/v1.5).
-The [current User Guide](docs/UserGuide.md) describes the v1.6 candidate; use the
-[v1.5 guide](https://github.com/AY2627S1-CS2103T-W13-2/tp/blob/v1.5/docs/UserGuide.md)
-with v1.5. Authorized testers can obtain v1.6 from the team's unpublished draft release.
+**Downloads:** [Download the v1.6 release](https://github.com/AY2627S1-CS2103T-W13-2/tp/releases/tag/v1.6).
+The [User Guide](docs/UserGuide.md) describes v1.6. For older installations, use the
+[v1.5 guide](https://github.com/AY2627S1-CS2103T-W13-2/tp/blob/v1.5/docs/UserGuide.md).
 
 ZoomAddress is a desktop participant-management application for directors of large-scale computing events, such as
 orientation camps. It helps event directors keep track of participants and their relevant information, making it
