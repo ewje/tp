@@ -274,7 +274,8 @@ Format: `assign-activity INDEX a/ACTIVITY`
 
 * `INDEX` is the positive integer shown beside the participant in the current list. After `find`, use the index in the search results.
 * Each participant can have at most one activity. Assigning another activity replaces the previous assignment.
-* `ACTIVITY` must not be blank. Names can contain spaces and punctuation; surrounding whitespace is removed.
+* Use a visibly nonblank `ACTIVITY` label. Ordinary spaces alone are rejected. Names can contain spaces and
+  punctuation; surrounding ordinary spaces are removed. See the assignment-label limitation below.
 * Supply `a/` exactly once. In this command it means activity; in `add` and `edit`, it still means address.
 * The assignment is saved automatically and retained after restarting or editing the participant's other details. Assigning or replacing an activity preserves their role; assigning or replacing a role preserves their activity.
 * The current filter remains active. If the new activity no longer matches it (for example, after `unassigned a/`),
@@ -294,7 +295,7 @@ Format: `assign-role INDEX r/ROLE`
 
 * Assigns the role to the participant at the specified `INDEX` in the displayed participant list.
 * The index **must be a positive integer** 1, 2, 3, …​ and refer to a displayed participant.
-* The role must contain at least one non-whitespace character.
+* Use a visibly nonblank role. Ordinary spaces alone are rejected; see the assignment-label limitation below.
 * Assigning another role to the same participant replaces the existing role.
 * A successful assignment restores the full directory view. Check displayed indices before assigning another role.
 
@@ -309,13 +310,19 @@ Format: `assign-group INDEX g/GROUP`
 
 * Assigns the participant at the specified `INDEX` to `GROUP`.
 * The index refers to the index number shown in the displayed participant list and must be a positive integer.
-* `GROUP` must not be blank and may contain spaces.
+* Use a visibly nonblank `GROUP` label. Ordinary spaces alone are rejected; group names may contain spaces.
 * A participant can belong to at most one group. Assigning another group replaces the current group and preserves their role and activity.
 * A successful assignment restores the full directory view. Check displayed indices before assigning another group.
 * Managing a separate list of groups is not supported yet.
 
 Example:
 * `assign-group 2 g/Logistics` assigns the second displayed participant to the `Logistics` group.
+
+**Known assignment-label limitation:** A pasted non-breaking space (U+00A0) by itself can be accepted as a group,
+role, or activity, even though the label looks empty. It is stored as an assignment, so the participant will not
+appear in the corresponding `unassigned` results. Use visibly nonblank labels. To correct an affected record, run
+`list`, note its displayed index, then use `unassign INDEX g/`, `unassign INDEX r/`, or `unassign INDEX a/` for the
+affected field. Check the displayed index again before assigning a visible label.
 
 ### Clearing an assignment: `unassign`
 
@@ -367,7 +374,11 @@ Formats:
 * Begin with exactly one of `g/`, `r/`, or `a/`. Missing, repeated, or multiple supported prefixes are rejected with a
   specific error. Text before the assignment prefix is also rejected. An embedded slash such as in `Tech/Media` is
   ordinary value text, but a separate `g/`, `r/`, or `a/` token is treated as another prefix.
-* Matching is case-insensitive and ignores leading and trailing whitespace. It remains exact after that normalisation:
+* Matching removes surrounding ordinary spaces and compares lower-cased values. A pasted non-breaking space
+  (U+00A0) is **not** removed, so use the stored spelling if a label contains one. For ordinary English-letter
+  labels, case differences are ignored; this is not full Unicode case folding. For example, a stored group
+  `İstanbul` (capital I with dot) does not match `filter g/istanbul`. Use the stored spelling for such labels.
+  The match remains exact after that normalization:
   `filter g/Logistics` does not match `Logistics Team`.
   This also applies to slash-containing values: `filter g/team a/b` matches a stored group named `Team A/B`.
   If the complete value does not match a stored assignment, a later `g/`, `r/`, or `a/` fragment is reported as a
@@ -405,10 +416,13 @@ Formats:
 * `filter-all r/ROLE a/ACTIVITY`
 * `filter-all g/GROUP r/ROLE a/ACTIVITY`
 
-* Criteria may appear in any order. Use two or three distinct lowercase prefixes, each with a non-blank value.
-  For this command, `a/` means activity. Use `filter` for one criterion.
-* Each selected assignment must match exactly, ignoring letter case and surrounding whitespace. An absent selected
-  assignment does not match. Unspecified categories do not restrict the results.
+* Criteria may appear in any order. Use two or three distinct lowercase prefixes, each with a value. Ordinary spaces
+  alone are rejected, but a non-breaking-space-only value may be accepted (known limitation above). For this command,
+  `a/` means activity. Use `filter` for one criterion.
+* Each selected assignment must match exactly after removing surrounding ordinary spaces and lower-casing. A
+  non-breaking space (U+00A0) is not removed. Ordinary English-letter case differences are ignored, but this is not
+  full Unicode case folding (as with `filter`, `İstanbul` does not match `istanbul`). An absent selected assignment
+  does not match. Unspecified categories do not restrict the results.
 * Searches start from **all stored participants**, replacing earlier searches and filters. `sort name` remains active;
   displayed indices start from 1 and apply to `view`, `edit`, assignment commands, and other index-based commands.
 * No matches (including an empty directory) gives an empty list and `0 participant(s) matched all assignments.`
@@ -471,6 +485,9 @@ Formats: `unassigned g/`, `unassigned r/`, or `unassigned a/`.
   filter rather than narrowing it. An active `sort name` order is preserved, and displayed indices start from 1.
 * Only the selected field must be absent; other assignments do not affect the result. A stored label literally
   named `Unassigned` is still an assignment and is not treated as missing.
+* A label made only of a pasted non-breaking space (U+00A0) can look empty but still counts as assigned. If a
+  participant is unexpectedly absent, use `list` to find their displayed index, `unassign` the affected field,
+  then recheck the index and assign a visibly nonblank label.
 * No participant fields or stored ordering change. The view itself is not saved; use `list` to show everyone again.
 * If nobody matches (including an empty directory), the displayed list is empty and the response is
   `0 participant(s) have no group assignment.` for `unassigned g/` (or the selected role/activity category).
@@ -511,12 +528,9 @@ Format: `find KEYWORD [MORE_KEYWORDS]`
 
 Examples:
 * `find Alex` returns `Alex Yeoh` in the initial sample data.
-* `find alex david` returns `Alex Yeoh` and `David Li`. Search results use the same
-  participant-card layout as the current directory screenshot below, including
-  each participant's group. The screenshot illustrates the layout, not this specific
-  search result.
-
-![Current directory showing participant assignments and non-empty remarks](images/Ui.png)
+* `find alex david` returns `Alex Yeoh` and `David Li`. Search results use the same participant-card layout as the
+  [directory screenshot in the typical event-day workflow](#typical-event-day-workflow); that image illustrates the
+  layout, not this specific search result.
 
 ### Locating participants by contact information: `find-contact`
 
@@ -632,18 +646,21 @@ the `java -jar` command. The Quick Start steps make that folder the JAR file's l
 data directly by editing the JSON file.
 
 <div markdown="span" class="alert alert-warning">:exclamation: **Caution:**
-If the existing participant file is unreadable or contains malformed JSON, a `null` document, or invalid values,
-ZoomAddress shows a startup error instead of opening an editable empty directory. The error identifies the data-file
-path and explains how to recover. ZoomAddress does not change the participant file on a failed start. Back up the
-file first, then correct the JSON or read permissions, or restore a known-good copy before restarting. Do not run
-commands against an assumed empty directory or delete the original file as a recovery step.<br>
+If the existing participant file is unreadable or contains malformed JSON, a `null` document, or a value rejected by
+the participant-data validators, ZoomAddress shows a startup error instead of opening an editable empty directory.
+The error identifies the data-file path and explains how to recover. ZoomAddress does not change the participant file
+on a failed start. Back up the file first, then correct the JSON or read permissions, or restore a known-good copy
+before restarting. Do not run commands against an assumed empty directory or delete the original file as a recovery
+step.<br>
 Each JSON object must have unique field names. For example, `{"persons":[],"persons":[]}` is rejected even though
 the arrays match; repeating a field inside a participant is also rejected. ZoomAddress does not choose the first or
 last value. If a manual edit or merge introduces duplicate keys, back up the original file, then reconcile the
 records into one `persons` array (and one value per participant field), or restore a known-good copy. Restart only
 after the ambiguity is resolved; a failed start leaves the original participant file unchanged.<br>
 If the data file is genuinely absent on first launch, ZoomAddress still opens with sample participants. Editing JSON
-directly can also cause unexpected behavior when values fall outside the supported range; edit it only if you are
+directly can also cause unexpected behavior even when the file loads: some assignment fields are read as strings by
+Jackson, so a JSON boolean in `group`, for example, can become the text `true` and be saved that way on a later
+successful command. Do not rely on startup validation to catch every wrong JSON type. Edit the file only if you are
 confident you can restore a valid copy.
 </div>
 

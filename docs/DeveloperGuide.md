@@ -201,9 +201,9 @@ and real storage using sorted/filtered displayed indices. It also checks invalid
 
 `MainApp` creates the editable model, logic and UI only after participant data loads. `JsonAddressBookStorage`
 checks the data path without following the final symbolic link. A genuinely absent file produces `Optional.empty()`
-and the existing sample-data first launch. An existing malformed file, invalid stored value, unreadable path or
-dangling final symbolic link produces `DataLoadingException` instead. The extra existence check prevents
-`JsonUtil`'s following-link `Files.exists` check from treating a dangling link as a missing first-run file.
+and the existing sample-data first launch. An existing malformed file, value rejected by the model validators,
+unreadable path or dangling final symbolic link produces `DataLoadingException` instead. The extra existence check
+prevents `JsonUtil`'s following-link `Files.exists` check from treating a dangling link as a missing first-run file.
 `JsonUtil` also rejects a top-level JSON `null` as a load failure. The JSON adapters reject null person and tag
 entries with `IllegalValueException`; storage translates that checked validation failure to `DataLoadingException`
 without masking unrelated runtime errors during model conversion.
@@ -217,6 +217,12 @@ ignored, and missing optional fields retain their legacy defaults. `readJsonFile
 This shared parsing rule also rejects duplicate keys in preferences. The existing `initPrefs` fallback still uses
 and saves default preferences on a load failure; participant-file preservation is not a preference-file guarantee.
 
+Startup validation is not a strict JSON-schema check for every participant field. Jackson binds several assignment
+fields to Java `String` parameters, so it can coerce a JSON boolean in `group` to the text `true`. If that text passes
+the group validator, the file loads and a later successful command can persist the coerced value. The `remark` field
+is different: its `JsonNode` adapter explicitly rejects non-string, non-null JSON values. Do not claim that all
+incorrect JSON types block startup; see [issue #140](https://github.com/AY2627S1-CS2103T-W13-2/tp/issues/140).
+
 On a load failure, `MainApp` retains an actionable error containing the absolute data path and does not construct
 `ModelManager`, `LogicManager` or `UiManager`. Its `start` method shows an error dialog, then exits when the user
 closes it. The participant file is not modified, and `stop` skips preference saving when initialization did not
@@ -224,7 +230,17 @@ produce a model. This is a startup fail-safe, not automatic repair or backup rec
 correct the input or restore a known-good copy before restarting.
 Read failures log the file path and exception type, not the malformed JSON or participant values.
 
-![Participant startup and load failure](images/StartupDataSequenceDiagram.png)
+The load path and the application's response are shown separately to keep each sequence focused. The first diagram
+covers participant-file loading; the second covers UI initialization and the startup error dialog. Open either image
+at full size if the text is small in the guide column.
+
+![Participant data-file load sequence](images/StartupDataSequenceDiagram.png)
+
+[Open the data-file load diagram at full size](images/StartupDataSequenceDiagram.png).
+
+![Application startup outcome sequence](images/StartupUiSequenceDiagram.png)
+
+[Open the startup outcome diagram at full size](images/StartupUiSequenceDiagram.png).
 
 `JsonAddressBookStorageTest` exercises duplicate arrays, matching empty arrays, escaped key names and nested remark
 fields with byte-for-byte preservation checks. `JsonUtilTest` covers known and ignored duplicate fields, while
@@ -398,9 +414,14 @@ participant fields (including assignments and remarks), saved JSON bytes and rel
 
 `FilterCommandParser` accepts exactly one of the group, role, or activity prefixes and creates one `FilterCommand`.
 The command uses the reusable `AssignmentMatchesPredicate`, parameterised by an `AssignmentType`, instead of separate
-predicates and commands for each assignment field. The predicate trims the requested value, normalises it with
-locale-independent lower-casing, and compares it with the participant's corresponding optional assignment. A missing
-assignment therefore cannot match.
+predicates and commands for each assignment field. The predicate calls `String.strip()` on both values, lower-cases
+them with `Locale.ROOT`, and compares the participant's corresponding optional assignment. `String.strip()` does not
+remove U+00A0 NO-BREAK SPACE, so a label made only of that character remains a present assignment and is excluded
+from `unassigned` results (see [#116](https://github.com/AY2627S1-CS2103T-W13-2/tp/issues/116) and
+[#120](https://github.com/AY2627S1-CS2103T-W13-2/tp/issues/120)). A missing assignment cannot match. Lower-casing
+is not full Unicode case folding: stored `İstanbul` does not match query `istanbul`. Users must search using the
+stored spelling for such labels; see
+[issue #139](https://github.com/AY2627S1-CS2103T-W13-2/tp/issues/139).
 
 For a quoted single-filter value, `FilterCommandParser` uses the same `QuotedAssignmentValueParser` as
 `FilterAllCommandParser`. The shared parser decodes only escaped quotes and backslashes and treats prefix-like text
@@ -430,9 +451,10 @@ partial quoting and missing separators are parse errors before any model update.
 
 The parser constructs `AssignmentsMatchAllPredicate`, which defensively validates and copies the criteria and
 composes the existing `AssignmentMatchesPredicate` instances with `allMatch` (AND). This keeps matching in Model
-and shares exact, locale-independent case-insensitive matching and absent-assignment semantics with `filter`.
-Criterion order is immaterial. `FilterCommand` and the assignment matching predicate retain their existing
-case-insensitive, slash-containing-label behavior; only the quoted-value parsing path is shared with `filter`.
+and shares the same trimmed, lower-cased exact matching and absent-assignment semantics with `filter` (including its
+Unicode limitation). Criterion order is immaterial. `FilterCommand` and the assignment matching predicate retain
+their existing ordinary-English case-insensitive, slash-containing-label behavior; only the quoted-value parsing path
+is shared with `filter`.
 
 `FilterAllCommand` replaces the model's filter predicate over all stored participants. It never filters an already
 filtered snapshot, changes the sorted-view comparator, or mutates participant records. Index-based commands read
