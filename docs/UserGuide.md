@@ -5,7 +5,7 @@ title: User Guide
 
 ZoomAddress is a **desktop participant-management application for directors of large-scale computing events**. It is optimized for keyboard-driven commands while retaining the benefits of a graphical interface, allowing event directors to manage participant records quickly and locally.
 
-This guide describes the **v1.6 release candidate**. For the published v1.5 packages, use the
+This guide describes **v1.6**. For the v1.5 packages, use the
 [v1.5 User Guide](https://github.com/AY2627S1-CS2103T-W13-2/tp/blob/v1.5/docs/UserGuide.md).
 If you are using v1.4.1, use the
 [archived v1.4.1 User Guide](https://github.com/AY2627S1-CS2103T-W13-2/tp/releases/download/v1.4.1/UserGuide-e493f549.md)
@@ -20,22 +20,20 @@ guide's version with the downloaded JAR's original filename or release notes bef
 
 ## Quick start
 
-The v1.6 candidate contains Windows x64, Linux x64, Intel Mac and Apple Silicon Mac
-native libraries in one JAR. Final cross-platform testing and publication are pending;
-the candidate does not replace the published v1.5 downloads yet.
+The v1.6 release contains Windows x64, Linux x64, Intel Mac and Apple Silicon Mac
+native libraries in one JAR. Windows and Linux ARM runtimes are not covered by this package.
 
 1. Ensure that Java `25` is installed on your computer.<br>
    **Mac users:** Ensure you have the precise JDK version prescribed [here](https://se-education.org/guides/tutorials/javaInstallationMac.html).
 
-1. For candidate testing, obtain the unchanged v1.6 JAR and `SHA256SUMS.txt` from the team's
-   unpublished draft release (repository access required) and save the JAR as
-   `ZoomAddress-v1.6.jar`. The same JAR is used on all four platforms above; no separate Mac ARM JAR is needed.
+1. Download `ZoomAddress-v1.6.jar` and `SHA256SUMS.txt` from the
+   [v1.6 release](https://github.com/AY2627S1-CS2103T-W13-2/tp/releases/tag/v1.6).
+   The same JAR is used on all four platforms above; no separate Mac ARM JAR is needed.
    * Use Java 25 for your runtime architecture. Windows and Linux ARM runtimes are not covered by this package.
    * Run `java -XshowSettings:properties -version` and find `os.arch` to check the active Java runtime:
      `amd64` or `x86_64` means x64; `aarch64` or `arm64` means arm64.
-   * Check the accompanying evidence and `SHA256SUMS.txt` for the source commit, checksum and tested platforms.
-     Public downloads will be available on the [releases page](https://github.com/AY2627S1-CS2103T-W13-2/tp/releases)
-     after publication is approved.
+   * Verify the downloaded JAR against `SHA256SUMS.txt` before running it. The v1.6 release notes record
+     its source commit and tested platforms.
 
 1. Copy the file to the folder you want to use as the _home folder_ for ZoomAddress.
 
@@ -89,8 +87,8 @@ fonts may differ by platform.
 
 ![Directory after list, showing four participants, displayed indices, assignments and remarks](images/Ui.png)
 
-*Directory captured from the exact v1.6 candidate on Windows with Java 25. The JavaFX scene uses synthetic
-participants and omits OS window decorations; it is not a screenshot of the published v1.5 package.*
+*Directory captured from the v1.6 release on Windows with Java 25. The JavaFX scene uses synthetic
+participants and omits OS window decorations.*
 
 *A `list` result: cards show assignments and non-empty remarks. Chen and Devi still need groups, shown as
 `Unassigned`; missing roles or activities are omitted from their cards.*
